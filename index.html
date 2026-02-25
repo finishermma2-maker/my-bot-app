@@ -12,66 +12,66 @@
         body {
             background-color: var(--bg-color); color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-            margin: 0; padding: 16px; padding-bottom: 90px;
+            margin: 0; padding: 0; box-sizing: border-box;
         }
         
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .header h1 { margin: 0; font-size: 24px; font-weight: 700; }
-        
-        .date-picker-btn {
-            background: var(--card-bg); border: 1px solid #ddd; border-radius: 12px;
-            padding: 8px 12px; font-size: 14px; display: flex; align-items: center;
-            cursor: pointer; position: relative; font-weight: 500;
+        /* СИСТЕМА ЭКРАНОВ (Видов) */
+        .view { display: none; padding: 16px; padding-bottom: 90px; min-height: 100vh; box-sizing: border-box; }
+        .view.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ШАПКА КАЛЕНДАРЯ */
+        .calendar-header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--card-bg); padding: 16px 20px; border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; margin-top: 10px;
         }
-        .date-picker-btn input[type="date"] {
-            position: absolute; opacity: 0; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer;
+        .calendar-header button {
+            background: none; border: none; font-size: 20px; color: var(--accent-color);
+            font-weight: bold; cursor: pointer; padding: 5px 15px;
+        }
+        .calendar-header h2 { margin: 0; font-size: 18px; text-transform: capitalize; }
+
+        /* СЕТКА КАЛЕНДАРЯ */
+        .calendar-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+            background: var(--card-bg); padding: 20px; border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+        .weekday { text-align: center; font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 10px; }
+        .day-cell {
+            aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 16px; font-weight: 500; border-radius: 12px; cursor: pointer; position: relative;
+        }
+        .day-cell.empty { background: transparent; cursor: default; }
+        .day-cell:not(.empty) { background: #f9f9fb; }
+        .day-cell:not(.empty):active { background: #eee; }
+        .day-cell.today { border: 2px solid var(--accent-color); color: var(--accent-color); font-weight: bold; background: #fff;}
+        .day-cell.has-records::after {
+            content: ''; width: 6px; height: 6px; background: var(--accent-color);
+            border-radius: 50%; position: absolute; bottom: 5px;
         }
 
-        /* ИСПРАВЛЕННЫЙ КАЛЕНДАРЬ: теперь он скроллится и не сжимается */
-        .week-calendar {
-            display: flex; gap: 12px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 15px;
-            scrollbar-width: none; scroll-behavior: smooth;
-        }
-        .week-calendar::-webkit-scrollbar { display: none; }
-        
-        .day-card {
-            flex: 0 0 64px; /* ЖЕСТКАЯ ШИРИНА: запрещаем сжиматься */
-            padding: 14px 0; background: var(--card-bg); border-radius: 18px;
-            text-align: center; cursor: pointer; border: 1px solid transparent; transition: 0.2s;
-        }
-        .day-card.active { 
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); 
-            color: white; box-shadow: 0 6px 15px rgba(255, 81, 47, 0.3); border-color: transparent;
-        }
-        .day-card .weekday { font-size: 13px; margin-bottom: 4px; opacity: 0.8; font-weight: 500;}
-        .day-card .day-num { font-size: 22px; font-weight: 700; }
-
-        /* ТАЙМЛАЙН ЗАПИСЕЙ */
-        .timeline { display: flex; flex-direction: column; gap: 16px; }
+        /* ЭКРАН ДНЯ: Расписание */
+        .day-header { font-size: 24px; font-weight: bold; margin-bottom: 20px; margin-top: 10px; }
         .timeline-empty { text-align: center; padding: 40px 20px; color: var(--text-muted); }
-        .time-slot { display: flex; gap: 12px; align-items: flex-start; }
-        .time-label { min-width: 45px; font-size: 15px; font-weight: 600; color: var(--text-main); padding-top: 10px; text-align: right; }
+        .time-slot { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
+        .time-label { min-width: 45px; font-size: 15px; font-weight: 600; padding-top: 12px; text-align: right; }
         .slot-card {
             flex-grow: 1; background: var(--card-bg); border-radius: 18px; padding: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.04); position: relative; overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04); border-left: 4px solid var(--accent-color);
         }
-        .slot-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent-color); }
         .slot-client { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
         .slot-service { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; }
-        .slot-notes { font-size: 13px; background: #f9f9fb; padding: 8px 12px; border-radius: 8px; margin: 0; color: #333;}
+        .slot-notes { font-size: 13px; background: #f9f9fb; padding: 8px; border-radius: 8px; margin: 0; color: #333;}
 
-        /* КНОПКА И ФОРМА */
+        /* КНОПКА И ФОРМЫ */
         .fab-button {
             position: fixed; bottom: 24px; left: 16px; right: 16px;
             background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
             color: white; border: none; padding: 18px; border-radius: 20px;
             font-weight: 600; font-size: 17px; box-shadow: 0 10px 25px rgba(255, 81, 47, 0.35); z-index: 10;
         }
-        .add-form {
-            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--bg-color); z-index: 100; padding: 20px; overflow-y: auto;
-        }
-        .add-form.active { display: block; }
         input[type="text"], input[type="time"], textarea, select {
             width: 100%; padding: 16px; margin-bottom: 16px; border: 1px solid #e5e5ea;
             border-radius: 14px; font-size: 16px; box-sizing: border-box; background: #fff;
@@ -80,34 +80,32 @@
     </style>
 </head>
 <body>
-    
-    <div id="dashboard">
-        <div class="header">
-            <h1 id="monthYearTitle">Месяц</h1>
-            <div class="date-picker-btn">
-                📅 Выбрать
-                <input type="date" id="nativeDatePicker" onchange="jumpToDate(this.value)">
-            </div>
+
+    <div id="view-calendar" class="view active">
+        <div class="calendar-header">
+            <button onclick="changeMonth(-1)">❮</button>
+            <h2 id="monthYearDisplay">Май 2026</h2>
+            <button onclick="changeMonth(1)">❯</button>
         </div>
-
-        <div class="week-calendar" id="calendarScroll">
+        
+        <div class="calendar-grid" id="calendarGrid">
             </div>
-
-        <div id="timelineContainer" class="timeline"></div>
-
-        <button class="fab-button" onclick="openForm()">+ Новая запись</button>
     </div>
 
-    <div id="addForm" class="add-form">
-        <div class="header">
-            <h2>Новая запись</h2>
-            <span style="font-size: 32px; color: var(--text-muted);" onclick="closeForm()">×</span>
-        </div>
+    <div id="view-day" class="view">
+        <div class="day-header" id="dayTitle">15 Мая</div>
         
-        <div id="selectedDateDisplay" style="margin-bottom: 20px; color: var(--accent-color); font-weight: 600; font-size: 16px;"></div>
+        <div id="timelineContainer"></div>
         
-        <input type="time" id="appTime" placeholder="Время записи">
-        <input type="text" id="clientName" placeholder="Имя клиента">
+        <button class="fab-button" onclick="openForm()">+ Записать клиента</button>
+    </div>
+
+    <div id="view-form" class="view">
+        <div class="day-header">Новая запись</div>
+        <div id="formDateLabel" style="margin-bottom: 20px; color: var(--accent-color); font-weight: 600;"></div>
+        
+        <input type="time" id="appTime" placeholder="Время">
+        <input type="text" id="clientName" placeholder="Имя клиента (напр. Анна)">
         <select id="service">
             <option value="" disabled selected>Выберите услугу...</option>
             <option value="Стрижка">Стрижка</option>
@@ -115,9 +113,9 @@
             <option value="Сложное окрашивание">Сложное окрашивание</option>
             <option value="Укладка">Укладка</option>
         </select>
-        <textarea id="notes" placeholder="Особенности волос, формула..."></textarea>
+        <textarea id="notes" placeholder="Формула, пожелания..."></textarea>
         
-        <button class="fab-button" style="position: static; margin-top: 10px;" onclick="saveAppointment()">💾 Сохранить запись</button>
+        <button class="fab-button" style="position: static; margin-top: 10px;" onclick="saveAppointment()">💾 Сохранить и Отправить</button>
     </div>
 
     <script>
@@ -125,103 +123,135 @@
         tg.expand();
         tg.setHeaderColor('#f5f7fa');
 
-        let selectedDateStr = "";
-        
-        // 1. Инициализация локальной базы данных внутри приложения
-        // Берем сохраненные записи из памяти браузера, или создаем пустой объект
+        // Настраиваем кнопку "Назад" от Телеграма
+        tg.BackButton.onClick(() => {
+            if (currentView === 'form') {
+                showView('day');
+            } else if (currentView === 'day') {
+                showView('calendar');
+                renderCalendar(); // Обновляем точки на календаре
+            }
+        });
+
+        // База данных в памяти устройства
         let appointmentsDB = JSON.parse(localStorage.getItem('crm_data')) || {};
+        
+        // Текущее состояние
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+        let selectedDateStr = "";
+        let currentView = 'calendar';
 
-        function renderCalendar(startDate) {
-            const scroll = document.getElementById('calendarScroll');
-            scroll.innerHTML = '';
+        // НАВИГАЦИЯ МЕЖДУ ЭКРАНАМИ
+        function showView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + viewName).classList.add('active');
+            currentView = viewName;
             
-            const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
-            const dayNames = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
-            
-            document.getElementById('monthYearTitle').innerText = `${monthNames[startDate.getMonth()]}`;
-
-            for (let i = 0; i < 90; i++) {
-                let d = new Date(startDate);
-                d.setDate(d.getDate() + i);
-                
-                let dateString = d.toISOString().split('T')[0];
-                let isToday = i === 0;
-
-                let card = document.createElement('div');
-                card.className = 'day-card' + (isToday ? ' active' : '');
-                card.onclick = () => selectDay(card, dateString, d);
-                
-                card.innerHTML = `<div class="weekday">${dayNames[d.getDay()]}</div><div class="day-num">${d.getDate()}</div>`;
-                scroll.appendChild(card);
-                
-                if (isToday) selectDay(card, dateString, d);
+            // Управляем кнопкой "Назад"
+            if (viewName === 'calendar') {
+                tg.BackButton.hide();
+            } else {
+                tg.BackButton.show();
             }
         }
 
-        function selectDay(element, dateStr, dateObj) {
-            document.querySelectorAll('.day-card').forEach(c => c.classList.remove('active'));
-            element.classList.add('active');
+        // ОТОБРАЖЕНИЕ КАЛЕНДАРЯ
+        const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+        const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
             
-            selectedDateStr = dateStr; 
-            const options = { day: 'numeric', month: 'long', year: 'numeric' };
-            document.getElementById('selectedDateDisplay').innerText = `Запись на: ${dateObj.toLocaleDateString('ru-RU', options)}`;
+            document.getElementById('monthYearDisplay').innerText = `${monthNames[currentMonth]} ${currentYear}`;
+
+            // Добавляем дни недели в шапку сетки
+            dayNames.forEach(day => {
+                grid.innerHTML += `<div class="weekday">${day}</div>`;
+            });
+
+            // Вычисляем первый день месяца (с поправкой на понедельник)
+            let firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            firstDay = firstDay === 0 ? 6 : firstDay - 1; 
             
-            // Как только выбрали день - рисуем расписание!
-            renderTimeline(dateStr);
-            
-            // Центрируем выбранную карточку при клике
-            element.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            let daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            let today = new Date();
+
+            // Пустые ячейки до первого числа
+            for (let i = 0; i < firstDay; i++) {
+                grid.innerHTML += `<div class="day-cell empty"></div>`;
+            }
+
+            // Заполняем дни
+            for (let day = 1; day <= daysInMonth; day++) {
+                let dateStr = `${currentYear}-${String(currentMonth+1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                let isToday = (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear());
+                let hasRecords = appointmentsDB[dateStr] && appointmentsDB[dateStr].length > 0;
+                
+                let classNames = `day-cell ${isToday ? 'today' : ''} ${hasRecords ? 'has-records' : ''}`;
+                
+                let cell = document.createElement('div');
+                cell.className = classNames;
+                cell.innerText = day;
+                cell.onclick = () => openDaySchedule(dateStr, day);
+                grid.appendChild(cell);
+            }
         }
 
-        // 2. ФУНКЦИЯ ОТРИСОВКИ РАСПИСАНИЯ
-        function renderTimeline(dateStr) {
+        function changeMonth(step) {
+            currentMonth += step;
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            renderCalendar();
+        }
+
+        // ОТКРЫТИЕ РАСПИСАНИЯ ДНЯ
+        function openDaySchedule(dateStr, day) {
+            selectedDateStr = dateStr;
+            document.getElementById('dayTitle').innerText = `${day} ${monthNames[currentMonth]}`;
+            
             const container = document.getElementById('timelineContainer');
             container.innerHTML = '';
             
-            let dayAppointments = appointmentsDB[dateStr] || [];
+            let dayApps = appointmentsDB[dateStr] || [];
             
-            if (dayAppointments.length === 0) {
-                container.innerHTML = `
-                <div class="timeline-empty">
-                    <h3 style="margin-bottom: 5px;">Нет записей</h3>
-                    <p style="margin-top: 0; font-size: 14px;">Нажмите + чтобы добавить клиента на этот день.</p>
-                </div>`;
-                return;
+            if (dayApps.length === 0) {
+                container.innerHTML = `<div class="timeline-empty"><h2>Свободный день</h2><p>Нажмите кнопку ниже, чтобы добавить запись.</p></div>`;
+            } else {
+                dayApps.sort((a, b) => a.time.localeCompare(b.time));
+                dayApps.forEach(app => {
+                    let notesHtml = app.notes ? `<p class="slot-notes">${app.notes}</p>` : '';
+                    container.innerHTML += `
+                    <div class="time-slot">
+                        <div class="time-label">${app.time}</div>
+                        <div class="slot-card">
+                            <div class="slot-client">${app.name}</div>
+                            <div class="slot-service">${app.service}</div>
+                            ${notesHtml}
+                        </div>
+                    </div>`;
+                });
             }
-
-            // Сортируем записи по времени (от раннего к позднему)
-            dayAppointments.sort((a, b) => a.time.localeCompare(b.time));
-
-            dayAppointments.forEach(app => {
-                let notesHtml = app.notes ? `<p class="slot-notes">${app.notes}</p>` : '';
-                container.innerHTML += `
-                <div class="time-slot">
-                    <div class="time-label">${app.time}</div>
-                    <div class="slot-card">
-                        <div class="slot-client">${app.name}</div>
-                        <div class="slot-service">${app.service}</div>
-                        ${notesHtml}
-                    </div>
-                </div>`;
-            });
+            showView('day');
         }
 
-        function jumpToDate(dateValue) {
-            if(!dateValue) return;
-            renderCalendar(new Date(dateValue)); 
-        }
-
+        // ОТКРЫТИЕ ФОРМЫ
         function openForm() {
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('addForm').classList.add('active');
+            // Сбрасываем поля
+            document.getElementById('appTime').value = '';
+            document.getElementById('clientName').value = '';
+            document.getElementById('service').value = '';
+            document.getElementById('notes').value = '';
+            
+            let [y, m, d] = selectedDateStr.split('-');
+            document.getElementById('formDateLabel').innerText = `Запись на: ${d} ${monthNames[parseInt(m)-1]} ${y}`;
+            showView('form');
         }
 
-        function closeForm() {
-            document.getElementById('dashboard').style.display = 'block';
-            document.getElementById('addForm').classList.remove('active');
-        }
-
-        // 3. СОХРАНЕНИЕ И ОТПРАВКА
+        // СОХРАНЕНИЕ
         function saveAppointment() {
             let time = document.getElementById('appTime').value;
             let name = document.getElementById('clientName').value;
@@ -229,32 +259,22 @@
             let notes = document.getElementById('notes').value;
             
             if(name && service && time) {
-                // Создаем массив для этого дня, если его еще нет
-                if (!appointmentsDB[selectedDateStr]) {
-                    appointmentsDB[selectedDateStr] = [];
-                }
+                if (!appointmentsDB[selectedDateStr]) appointmentsDB[selectedDateStr] = [];
                 
-                // Добавляем новую запись
-                appointmentsDB[selectedDateStr].push({
-                    time: time, name: name, service: service, notes: notes
-                });
-                
-                // Сохраняем в память телефона/браузера
+                appointmentsDB[selectedDateStr].push({ time, name, service, notes });
                 localStorage.setItem('crm_data', JSON.stringify(appointmentsDB));
                 
-                let data = {
-                    action: 'new_client', date: selectedDateStr, time: time, name: name, service: service, notes: notes
-                };
-                
-                // Отправляем боту (Telegram закроет окно после этого)
+                // Отправляем данные в Python (это закроет приложение)
+                let data = { action: 'new_client', date: selectedDateStr, time, name, service, notes };
                 tg.sendData(JSON.stringify(data));
                 tg.close();
             } else {
-                tg.showAlert("Заполните Время, Имя и Услугу!");
+                tg.showAlert("Пожалуйста, заполните Время, Имя и Услугу!");
             }
         }
 
-        renderCalendar(new Date());
+        // Инициализация при старте
+        renderCalendar();
     </script>
 </body>
 </html>
