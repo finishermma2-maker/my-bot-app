@@ -5,276 +5,191 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* Цветовая палитра на основе референса BEGY */
         :root {
-            --bg-color: #f5f7fa; --card-bg: #ffffff; --text-main: #1d1d1f; --text-muted: #86868b;
-            --accent-color: #ff6b4a; --gradient-start: #ff8e53; --gradient-end: #ff512f;
-        }
-        body {
-            background-color: var(--bg-color); color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-            margin: 0; padding: 0; box-sizing: border-box;
+            --bg-base: #101010;          /* Самый темный фон (подложка) */
+            --bg-surface: #1e1e1e;       /* Фон карточек и панелей */
+            --bg-surface-light: #2c2c2e; /* Светлые элементы на карточках */
+            --accent: #b4f04b;           /* Неоновый зеленый */
+            --text-main: #ffffff;        /* Белый текст */
+            --text-muted: #8e8e93;       /* Серый текст */
+            --border: #333333;           /* Линии разделителей */
         }
         
-        /* СИСТЕМА ЭКРАНОВ (Видов) */
-        .view { display: none; padding: 16px; padding-bottom: 90px; min-height: 100vh; box-sizing: border-box; }
-        .view.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* ШАПКА КАЛЕНДАРЯ */
-        .calendar-header {
-            display: flex; justify-content: space-between; align-items: center;
-            background: var(--card-bg); padding: 16px 20px; border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; margin-top: 10px;
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            margin: 0; padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
-        .calendar-header button {
-            background: none; border: none; font-size: 20px; color: var(--accent-color);
-            font-weight: bold; cursor: pointer; padding: 5px 15px;
-        }
-        .calendar-header h2 { margin: 0; font-size: 18px; text-transform: capitalize; }
 
-        /* СЕТКА КАЛЕНДАРЯ */
+        /* КОНТЕЙНЕРЫ ЭКРАНОВ */
+        .page {
+            display: none; 
+            padding: 16px; 
+            padding-bottom: 100px; /* Отступ под нижнее меню */
+            min-height: 100vh;
+            box-sizing: border-box;
+            animation: fadeIn 0.2s ease-out;
+        }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ОБЩИЕ ЭЛЕМЕНТЫ */
+        h1, h2, h3 { margin: 0; font-weight: 600; }
+        .section-title { font-size: 20px; margin: 24px 0 16px 0; }
+        
+        /* Кнопки */
+        .btn-primary {
+            background-color: var(--accent);
+            color: #000000;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-primary:active { opacity: 0.7; }
+        .btn-text {
+            color: var(--accent); background: none; border: none; 
+            font-size: 14px; padding: 0; cursor: pointer;
+        }
+
+        /* НИЖНЕЕ НАВИГАЦИОННОЕ МЕНЮ */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background-color: var(--bg-base);
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 10px 0 20px 0; /* Учитываем "челку" айфонов */
+            z-index: 1000;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            color: var(--text-muted); font-size: 11px; cursor: pointer; transition: 0.2s;
+        }
+        .nav-item svg { width: 24px; height: 24px; fill: currentColor; }
+        .nav-item.active { color: var(--accent); }
+
+        /* ЭКРАН 1: ГЛАВНАЯ (ЛЕНТА) */
+        .header-profile { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; margin-top: 10px; }
+        .header-profile h1 { font-size: 22px; color: var(--text-muted); font-weight: 500;}
+        .header-profile h1 span { color: var(--text-main); font-weight: 600; }
+        .avatar { width: 44px; height: 44px; background: var(--bg-surface-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+
+        .empty-state {
+            background: var(--bg-surface); border-radius: 16px; padding: 24px 16px;
+            text-align: center; margin-bottom: 24px; border: 1px solid var(--border);
+        }
+        .empty-state h3 { font-size: 16px; margin-bottom: 8px; font-weight: 500;}
+
+        /* КАРТОЧКА ЗАПИСИ (Таймлайн) */
+        .time-slot { display: flex; gap: 16px; margin-bottom: 16px; align-items: flex-start; }
+        .time-label { min-width: 45px; font-size: 15px; font-weight: 600; color: var(--text-muted); padding-top: 14px; text-align: right; }
+        .slot-card {
+            flex-grow: 1; background: var(--bg-surface); border-radius: 16px; padding: 16px;
+            border-left: 4px solid var(--accent);
+        }
+        .slot-card .name { font-size: 17px; font-weight: 600; margin-bottom: 4px; color: var(--text-main); }
+        .slot-card .service { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; }
+        .slot-card .notes { font-size: 13px; background: var(--bg-base); padding: 8px 12px; border-radius: 8px; color: #d1d1d6; margin: 0; }
+
+        /* ЭКРАН 2: КАЛЕНДАРЬ */
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin: 10px 0 24px 0; }
+        .cal-header h2 { font-size: 18px; }
+        .cal-nav-btn { background: var(--bg-surface); border: none; color: var(--text-main); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;}
+        
         .calendar-grid {
             display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
-            background: var(--card-bg); padding: 20px; border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            background: var(--bg-surface); padding: 16px; border-radius: 20px;
+            margin-bottom: 24px;
         }
-        .weekday { text-align: center; font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 10px; }
+        .weekday { text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
         .day-cell {
             aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 16px; font-weight: 500; border-radius: 12px; cursor: pointer; position: relative;
+            font-size: 16px; border-radius: 12px; cursor: pointer; position: relative; color: var(--text-main);
         }
         .day-cell.empty { background: transparent; cursor: default; }
-        .day-cell:not(.empty) { background: #f9f9fb; }
-        .day-cell:not(.empty):active { background: #eee; }
-        .day-cell.today { border: 2px solid var(--accent-color); color: var(--accent-color); font-weight: bold; background: #fff;}
+        .day-cell.faded { color: #555; }
+        .day-cell:not(.empty):active { background: var(--bg-surface-light); }
+        .day-cell.today { border: 1px solid var(--border); }
+        .day-cell.selected { background: var(--accent); color: #000; font-weight: bold; }
+        
         .day-cell.has-records::after {
-            content: ''; width: 6px; height: 6px; background: var(--accent-color);
-            border-radius: 50%; position: absolute; bottom: 5px;
+            content: ''; width: 5px; height: 5px; background: var(--text-muted);
+            border-radius: 50%; position: absolute; bottom: 4px;
         }
+        .day-cell.selected.has-records::after { background: #000; } /* Черная точка на зеленом фоне */
 
-        /* ЭКРАН ДНЯ: Расписание */
-        .day-header { font-size: 24px; font-weight: bold; margin-bottom: 20px; margin-top: 10px; }
-        .timeline-empty { text-align: center; padding: 40px 20px; color: var(--text-muted); }
-        .time-slot { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
-        .time-label { min-width: 45px; font-size: 15px; font-weight: 600; padding-top: 12px; text-align: right; }
-        .slot-card {
-            flex-grow: 1; background: var(--card-bg); border-radius: 18px; padding: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.04); border-left: 4px solid var(--accent-color);
+        /* ЭКРАН 3: ФОРМА ДОБАВЛЕНИЯ (Перекрывает всё) */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-base); z-index: 2000; padding: 16px; overflow-y: auto;
         }
-        .slot-client { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
-        .slot-service { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; }
-        .slot-notes { font-size: 13px; background: #f9f9fb; padding: 8px; border-radius: 8px; margin: 0; color: #333;}
-
-        /* КНОПКА И ФОРМЫ */
-        .fab-button {
-            position: fixed; bottom: 24px; left: 16px; right: 16px;
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            color: white; border: none; padding: 18px; border-radius: 20px;
-            font-weight: 600; font-size: 17px; box-shadow: 0 10px 25px rgba(255, 81, 47, 0.35); z-index: 10;
+        .modal.active { display: block; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
+        .modal-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; margin-top: 10px;}
+        .back-btn { background: none; border: none; color: var(--accent); font-size: 24px; padding: 0; cursor: pointer; }
+        
+        /* Поля ввода (Темные) */
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; margin-left: 4px;}
+        input, select, textarea {
+            width: 100%; padding: 16px; border: 1px solid var(--border); border-radius: 14px;
+            background: var(--bg-surface); color: var(--text-main); font-size: 16px; box-sizing: border-box; font-family: inherit;
         }
-        input[type="text"], input[type="time"], textarea, select {
-            width: 100%; padding: 16px; margin-bottom: 16px; border: 1px solid #e5e5ea;
-            border-radius: 14px; font-size: 16px; box-sizing: border-box; background: #fff;
-        }
-        textarea { min-height: 120px; resize: none; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+        input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+        textarea { min-height: 100px; resize: none; }
     </style>
 </head>
 <body>
 
-    <div id="view-calendar" class="view active">
-        <div class="calendar-header">
-            <button onclick="changeMonth(-1)">❮</button>
-            <h2 id="monthYearDisplay">Май 2026</h2>
-            <button onclick="changeMonth(1)">❯</button>
+    <nav class="bottom-nav" id="bottomNav">
+        <div class="nav-item active" onclick="switchTab('home')">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            Главная
+        </div>
+        <div class="nav-item" onclick="switchTab('calendar')">
+            <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+            Календарь
+        </div>
+        <div class="nav-item" onclick="tg.showAlert('Раздел базы клиентов в разработке')">
+            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            Клиенты
+        </div>
+        <div class="nav-item" onclick="tg.showAlert('Настройки профиля мастера')">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            Профиль
+        </div>
+    </nav>
+
+    <div id="tab-home" class="page active">
+        <div class="header-profile">
+            <h1>Добро пожаловать, <br><span id="masterName">Мастер</span>!</h1>
+            <div class="avatar">👤</div>
+        </div>
+
+        <div class="section-title">Сегодняшние записи</div>
+        
+        <div id="homeScheduleContainer">
+            </div>
+    </div>
+
+    <div id="tab-calendar" class="page">
+        <div class="cal-header">
+            <button class="cal-nav-btn" onclick="changeMonth(-1)">❮</button>
+            <h2 id="monthYearDisplay">Февраль 2025</h2>
+            <button class="cal-nav-btn" onclick="changeMonth(1)">❯</button>
         </div>
         
         <div class="calendar-grid" id="calendarGrid">
             </div>
-    </div>
 
-    <div id="view-day" class="view">
-        <div class="day-header" id="dayTitle">15 Мая</div>
-        
-        <div id="timelineContainer"></div>
-        
-        <button class="fab-button" onclick="openForm()">+ Записать клиента</button>
-    </div>
-
-    <div id="view-form" class="view">
-        <div class="day-header">Новая запись</div>
-        <div id="formDateLabel" style="margin-bottom: 20px; color: var(--accent-color); font-weight: 600;"></div>
-        
-        <input type="time" id="appTime" placeholder="Время">
-        <input type="text" id="clientName" placeholder="Имя клиента (напр. Анна)">
-        <select id="service">
-            <option value="" disabled selected>Выберите услугу...</option>
-            <option value="Стрижка">Стрижка</option>
-            <option value="Окрашивание">Окрашивание</option>
-            <option value="Сложное окрашивание">Сложное окрашивание</option>
-            <option value="Укладка">Укладка</option>
-        </select>
-        <textarea id="notes" placeholder="Формула, пожелания..."></textarea>
-        
-        <button class="fab-button" style="position: static; margin-top: 10px;" onclick="saveAppointment()">💾 Сохранить и Отправить</button>
-    </div>
-
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.setHeaderColor('#f5f7fa');
-
-        // Настраиваем кнопку "Назад" от Телеграма
-        tg.BackButton.onClick(() => {
-            if (currentView === 'form') {
-                showView('day');
-            } else if (currentView === 'day') {
-                showView('calendar');
-                renderCalendar(); // Обновляем точки на календаре
-            }
-        });
-
-        // База данных в памяти устройства
-        let appointmentsDB = JSON.parse(localStorage.getItem('crm_data')) || {};
-        
-        // Текущее состояние
-        let currentDate = new Date();
-        let currentMonth = currentDate.getMonth();
-        let currentYear = currentDate.getFullYear();
-        let selectedDateStr = "";
-        let currentView = 'calendar';
-
-        // НАВИГАЦИЯ МЕЖДУ ЭКРАНАМИ
-        function showView(viewName) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById('view-' + viewName).classList.add('active');
-            currentView = viewName;
-            
-            // Управляем кнопкой "Назад"
-            if (viewName === 'calendar') {
-                tg.BackButton.hide();
-            } else {
-                tg.BackButton.show();
-            }
-        }
-
-        // ОТОБРАЖЕНИЕ КАЛЕНДАРЯ
-        const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
-        const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
-
-        function renderCalendar() {
-            const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = '';
-            
-            document.getElementById('monthYearDisplay').innerText = `${monthNames[currentMonth]} ${currentYear}`;
-
-            // Добавляем дни недели в шапку сетки
-            dayNames.forEach(day => {
-                grid.innerHTML += `<div class="weekday">${day}</div>`;
-            });
-
-            // Вычисляем первый день месяца (с поправкой на понедельник)
-            let firstDay = new Date(currentYear, currentMonth, 1).getDay();
-            firstDay = firstDay === 0 ? 6 : firstDay - 1; 
-            
-            let daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            let today = new Date();
-
-            // Пустые ячейки до первого числа
-            for (let i = 0; i < firstDay; i++) {
-                grid.innerHTML += `<div class="day-cell empty"></div>`;
-            }
-
-            // Заполняем дни
-            for (let day = 1; day <= daysInMonth; day++) {
-                let dateStr = `${currentYear}-${String(currentMonth+1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                
-                let isToday = (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear());
-                let hasRecords = appointmentsDB[dateStr] && appointmentsDB[dateStr].length > 0;
-                
-                let classNames = `day-cell ${isToday ? 'today' : ''} ${hasRecords ? 'has-records' : ''}`;
-                
-                let cell = document.createElement('div');
-                cell.className = classNames;
-                cell.innerText = day;
-                cell.onclick = () => openDaySchedule(dateStr, day);
-                grid.appendChild(cell);
-            }
-        }
-
-        function changeMonth(step) {
-            currentMonth += step;
-            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-            else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-            renderCalendar();
-        }
-
-        // ОТКРЫТИЕ РАСПИСАНИЯ ДНЯ
-        function openDaySchedule(dateStr, day) {
-            selectedDateStr = dateStr;
-            document.getElementById('dayTitle').innerText = `${day} ${monthNames[currentMonth]}`;
-            
-            const container = document.getElementById('timelineContainer');
-            container.innerHTML = '';
-            
-            let dayApps = appointmentsDB[dateStr] || [];
-            
-            if (dayApps.length === 0) {
-                container.innerHTML = `<div class="timeline-empty"><h2>Свободный день</h2><p>Нажмите кнопку ниже, чтобы добавить запись.</p></div>`;
-            } else {
-                dayApps.sort((a, b) => a.time.localeCompare(b.time));
-                dayApps.forEach(app => {
-                    let notesHtml = app.notes ? `<p class="slot-notes">${app.notes}</p>` : '';
-                    container.innerHTML += `
-                    <div class="time-slot">
-                        <div class="time-label">${app.time}</div>
-                        <div class="slot-card">
-                            <div class="slot-client">${app.name}</div>
-                            <div class="slot-service">${app.service}</div>
-                            ${notesHtml}
-                        </div>
-                    </div>`;
-                });
-            }
-            showView('day');
-        }
-
-        // ОТКРЫТИЕ ФОРМЫ
-        function openForm() {
-            // Сбрасываем поля
-            document.getElementById('appTime').value = '';
-            document.getElementById('clientName').value = '';
-            document.getElementById('service').value = '';
-            document.getElementById('notes').value = '';
-            
-            let [y, m, d] = selectedDateStr.split('-');
-            document.getElementById('formDateLabel').innerText = `Запись на: ${d} ${monthNames[parseInt(m)-1]} ${y}`;
-            showView('form');
-        }
-
-        // СОХРАНЕНИЕ
-        function saveAppointment() {
-            let time = document.getElementById('appTime').value;
-            let name = document.getElementById('clientName').value;
-            let service = document.getElementById('service').value;
-            let notes = document.getElementById('notes').value;
-            
-            if(name && service && time) {
-                if (!appointmentsDB[selectedDateStr]) appointmentsDB[selectedDateStr] = [];
-                
-                appointmentsDB[selectedDateStr].push({ time, name, service, notes });
-                localStorage.setItem('crm_data', JSON.stringify(appointmentsDB));
-                
-                // Отправляем данные в Python (это закроет приложение)
-                let data = { action: 'new_client', date: selectedDateStr, time, name, service, notes };
-                tg.sendData(JSON.stringify(data));
-                tg.close();
-            } else {
-                tg.showAlert("Пожалуйста, заполните Время, Имя и Услугу!");
-            }
-        }
-
-        // Инициализация при старте
-        renderCalendar();
-    </script>
-</body>
-</html>
+        <button class="btn-primary" style="margin-top: 10px;" onclick="openAddForm()">Добавить занятие</button
