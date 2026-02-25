@@ -2,113 +2,243 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* Подстраиваемся под системные цвета Telegram */
-        body {
-            background-color: var(--tg-theme-bg-color, #f3f2f8);
-            color: var(--tg-theme-text-color, #000);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
+        :root {
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-main: #1d1d1f;
+            --text-muted: #86868b;
+            /* Цвета градиента как на скрине */
+            --accent-color: #ff6b4a; 
+            --gradient-start: #ff8e53;
+            --gradient-end: #ff512f;
         }
-        h2 {
-            margin-top: 0;
-            font-size: 24px;
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Шапка */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            margin-top: 10px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
             font-weight: 700;
         }
-        /* Стильные карточки */
-        .card {
-            background-color: var(--tg-theme-secondary-bg-color, #ffffff);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-        .card h3 {
-            margin-top: 0;
+        .header-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
             font-size: 18px;
-            border-bottom: 1px solid var(--tg-theme-hint-color, #ccc);
-            padding-bottom: 10px;
         }
-        /* Поля ввода */
-        input, textarea {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid var(--tg-theme-hint-color, #ddd);
-            border-radius: 10px;
-            background: var(--tg-theme-bg-color, #fff);
-            color: var(--tg-theme-text-color, #000);
-            font-size: 16px;
-            box-sizing: border-box;
+
+        /* Градиентный баннер (как "Приведи друга") */
+        .banner {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 24px;
+            padding: 24px;
+            color: white;
+            text-align: center;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 20px rgba(255, 81, 47, 0.2);
         }
-        textarea {
-            resize: vertical;
-            min-height: 80px;
+        .banner h2 {
+            margin: 0 0 8px 0;
+            font-size: 22px;
         }
-        /* Красивая кнопка */
-        button {
-            background-color: var(--tg-theme-button-color, #007aff);
-            color: var(--tg-theme-button-text-color, #fff);
+        .banner p {
+            margin: 0 0 16px 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .banner button {
+            background: white;
+            color: var(--accent-color);
             border: none;
+            padding: 12px 24px;
             border-radius: 12px;
-            padding: 15px;
-            font-size: 16px;
             font-weight: 600;
+            font-size: 15px;
             width: 100%;
             cursor: pointer;
-            transition: opacity 0.2s;
         }
-        button:active {
-            opacity: 0.7;
+
+        /* Заголовки секций */
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-main);
+        }
+
+        /* Горизонтальный скролл (как "Рекомендуем пройти") */
+        .horizontal-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            padding-bottom: 10px;
+            margin-bottom: 24px;
+            scrollbar-width: none;
+        }
+        .horizontal-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .h-card {
+            min-width: 140px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .h-card .time {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .h-card .name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        .h-card .service {
+            font-size: 13px;
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        /* Список-меню (как список под баннером) */
+        .menu-list {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 8px 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-weight: 500;
+            font-size: 16px;
+        }
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        .chevron {
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        /* Форма добавления (Всплывает поверх) */
+        .add-form {
+            display: none;
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .add-form.active {
+            display: block;
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        input, textarea {
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid #e5e5ea;
+            border-radius: 12px;
+            background: #f9f9fb;
+            font-size: 16px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            background: #fff;
+        }
+        textarea {
+            min-height: 100px;
+            resize: none;
+        }
+        .main-button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 16px;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 107, 74, 0.3);
         }
     </style>
 </head>
 <body>
+    <div id="dashboard">
+        <div class="header">
+            <h1>Моя CRM</h1>
+            <div class="header-avatar">✂️</div>
+        </div>
 
-    <h2>Моя CRM ✂️</h2>
+        <div class="banner">
+            <h2>Новая запись</h2>
+            <p>Добавьте клиента, чтобы не забыть формулу и время</p>
+            <button onclick="showForm()">+ Записать клиента</button>
+        </div>
 
-    <div class="card">
-        <h3>Пример досье (Недавние)</h3>
-        <p><b>👩 Елена</b> - 14:00</p>
-        <p><i>Услуга:</i> Стрижка и укладка</p>
-        <p><i>Формула/Заметки:</i> Обычно просит гладкий низкий пучок. Сегодня захотела текстурную пикси. Оксид 3% на корни.</p>
+        <div class="section-title">Сегодня</div>
+        
+        <div class="horizontal-scroll">
+            <div class="h-card">
+                <div class="time">12:00</div>
+                <div class="name">Анна</div>
+                <div class="service">Окрашивание</div>
+            </div>
+            <div class="h-card">
+                <div class="time">15:30</div>
+                <div class="name">Мария</div>
+                <div class="service">Стрижка (Пикси)</div>
+            </div>
+            <div class="h-card">
+                <div class="time">18:00</div>
+                <div class="name">Елена</div>
+                <div class="service">Укладка (Локоны)</div>
+            </div>
+        </div>
+
+        <div class="section-title">Управление</div>
+        <div class="menu-list">
+            <div class="menu-item" onclick="tg.showAlert('Тут будет список всех клиентов')">
+                👥 База клиентов <span class="chevron">></span>
+            </div>
+            <div class="menu-item" onclick="tg.showAlert('Тут будет календарь на месяц')">
+                📅 Календарь записей <span class="chevron">></span>
+            </div>
+        </div>
     </div>
-
-    <div class="card">
-        <h3>Добавить новую запись</h3>
-        <input type="text" id="clientName" placeholder="Имя клиента">
-        <input type="text" id="service" placeholder="Услуга (окрашивание, стрижка)">
-        <textarea id="notes" placeholder="Особенности волос, формула..."></textarea>
-        <button onclick="saveAppointment()">💾 Сохранить в базу</button>
-    </div>
-
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand(); // Открываем на весь экран смартфона
-
-        function saveAppointment() {
-            // Собираем данные из полей
-            let name = document.getElementById('clientName').value;
-            let service = document.getElementById('service').value;
-            let notes = document.getElementById('notes').value;
-            
-            // Если поля не пустые, отправляем боту
-            if(name && service) {
-                let data = {
-                    action: 'new_client',
-                    name: name,
-                    service: service,
-                    notes: notes
-                };
-                tg.sendData(JSON.stringify(data));
-                tg.close(); // Закрываем окошко
-            } else {
-                tg.showAlert("Пожалуйста, введите имя и услугу!");
-            }
-        }
-    </script>
-</body>
-</html>
