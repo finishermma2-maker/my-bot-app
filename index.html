@@ -10,10 +10,11 @@
             --card-bg: #ffffff;
             --text-main: #1d1d1f;
             --text-muted: #86868b;
-            /* Цвета градиента как на скрине */
             --accent-color: #ff6b4a; 
             --gradient-start: #ff8e53;
             --gradient-end: #ff512f;
+            --free-slot: #e8f0fe;
+            --free-text: #1a73e8;
         }
         body {
             background-color: var(--bg-color);
@@ -21,6 +22,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 16px;
+            padding-bottom: 80px; /* Место для плавающей кнопки */
             -webkit-font-smoothing: antialiased;
         }
         
@@ -29,216 +31,264 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             margin-top: 10px;
         }
-        .header h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 700;
-        }
+        .header h1 { margin: 0; font-size: 26px; font-weight: 700; }
         .header-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 40px; height: 40px; border-radius: 50%;
             background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 18px;
+        }
+
+        /* Календарь-лента (Неделя) */
+        .week-calendar {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            scrollbar-width: none;
+        }
+        .week-calendar::-webkit-scrollbar { display: none; }
+        
+        .day-card {
+            min-width: 60px;
+            padding: 12px 0;
+            background: var(--card-bg);
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+        .day-card.active {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            box-shadow: 0 8px 16px rgba(255, 81, 47, 0.25);
+        }
+        .day-card .weekday { font-size: 13px; margin-bottom: 4px; opacity: 0.7; }
+        .day-card .day-num { font-size: 20px; font-weight: 700; }
+        .day-card.active .weekday { opacity: 0.9; }
+
+        /* Таймлайн расписания */
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .time-slot {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .time-label {
+            min-width: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            padding-top: 10px;
+            text-align: right;
+        }
+        
+        /* Карточки записей */
+        .slot-card {
+            flex-grow: 1;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            position: relative;
+            overflow: hidden;
+        }
+        .slot-card::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+            background: var(--accent-color);
+        }
+        .slot-card.free {
+            background: var(--free-slot);
+            color: var(--free-text);
+            box-shadow: none;
+            border: 1px dashed #a0c3ff;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 18px;
+            min-height: 50px;
         }
-
-        /* Градиентный баннер (как "Приведи друга") */
-        .banner {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            border-radius: 24px;
-            padding: 24px;
-            color: white;
-            text-align: center;
-            margin-bottom: 24px;
-            box-shadow: 0 10px 20px rgba(255, 81, 47, 0.2);
-        }
-        .banner h2 {
-            margin: 0 0 8px 0;
-            font-size: 22px;
-        }
-        .banner p {
-            margin: 0 0 16px 0;
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        .banner button {
-            background: white;
-            color: var(--accent-color);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 15px;
-            width: 100%;
-            cursor: pointer;
-        }
-
-        /* Заголовки секций */
-        .section-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 16px;
+        .slot-card.free::before { display: none; }
+        
+        .slot-client { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+        .slot-service { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; }
+        .slot-notes {
+            font-size: 13px;
+            background: #f9f9fb;
+            padding: 8px 12px;
+            border-radius: 8px;
             color: var(--text-main);
+            margin: 0;
         }
 
-        /* Горизонтальный скролл (как "Рекомендуем пройти") */
-        .horizontal-scroll {
-            display: flex;
-            overflow-x: auto;
-            gap: 12px;
-            padding-bottom: 10px;
-            margin-bottom: 24px;
-            scrollbar-width: none;
-        }
-        .horizontal-scroll::-webkit-scrollbar {
-            display: none;
-        }
-        .h-card {
-            min-width: 140px;
-            background: var(--card-bg);
-            border-radius: 20px;
+        /* Плавающая кнопка записи (FAB) */
+        .fab-button {
+            position: fixed;
+            bottom: 24px;
+            left: 16px;
+            right: 16px;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            border: none;
             padding: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-        }
-        .h-card .time {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-        }
-        .h-card .name {
+            border-radius: 20px;
             font-weight: 600;
             font-size: 16px;
-            margin-bottom: 4px;
-        }
-        .h-card .service {
-            font-size: 13px;
-            color: var(--accent-color);
-            font-weight: 500;
+            box-shadow: 0 10px 25px rgba(255, 81, 47, 0.3);
+            cursor: pointer;
+            z-index: 10;
         }
 
-        /* Список-меню (как список под баннером) */
-        .menu-list {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 8px 16px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-        }
-        .menu-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-weight: 500;
-            font-size: 16px;
-        }
-        .menu-item:last-child {
-            border-bottom: none;
-        }
-        .chevron {
-            color: var(--text-muted);
-            font-weight: bold;
-        }
-
-        /* Форма добавления (Всплывает поверх) */
+        /* Форма записи */
         .add-form {
             display: none;
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        }
-        .add-form.active {
-            display: block;
-            animation: slideUp 0.3s ease-out;
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        input, textarea {
-            width: 100%;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-color);
+            z-index: 100;
             padding: 16px;
-            margin-bottom: 16px;
-            border: 1px solid #e5e5ea;
-            border-radius: 12px;
-            background: #f9f9fb;
-            font-size: 16px;
-            box-sizing: border-box;
-            font-family: inherit;
+            overflow-y: auto;
         }
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            background: #fff;
+        .add-form.active { display: block; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
+        input, textarea, select {
+            width: 100%; padding: 16px; margin-bottom: 16px;
+            border: 1px solid #e5e5ea; border-radius: 12px;
+            background: #fff; font-size: 16px; box-sizing: border-box; font-family: inherit;
         }
-        textarea {
-            min-height: 100px;
-            resize: none;
-        }
-        .main-button {
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 16px;
-            font-weight: 600;
-            font-size: 16px;
-            width: 100%;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(255, 107, 74, 0.3);
-        }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent-color); }
+        textarea { min-height: 100px; resize: none; }
     </style>
 </head>
 <body>
+    
     <div id="dashboard">
         <div class="header">
-            <h1>Моя CRM</h1>
-            <div class="header-avatar">✂️</div>
+            <h1>Расписание</h1>
+            <div class="header-avatar" onclick="tg.showAlert('Тут будут настройки профиля')">✂️</div>
         </div>
 
-        <div class="banner">
-            <h2>Новая запись</h2>
-            <p>Добавьте клиента, чтобы не забыть формулу и время</p>
-            <button onclick="showForm()">+ Записать клиента</button>
+        <div class="week-calendar" id="calendar">
+            <div class="day-card"><div class="weekday">Пн</div><div class="day-num">23</div></div>
+            <div class="day-card"><div class="weekday">Вт</div><div class="day-num">24</div></div>
+            <div class="day-card active"><div class="weekday">Ср</div><div class="day-num">25</div></div>
+            <div class="day-card"><div class="weekday">Чт</div><div class="day-num">26</div></div>
+            <div class="day-card"><div class="weekday">Пт</div><div class="day-num">27</div></div>
+            <div class="day-card"><div class="weekday">Сб</div><div class="day-num">28</div></div>
+            <div class="day-card"><div class="weekday">Вс</div><div class="day-num">1</div></div>
         </div>
 
-        <div class="section-title">Сегодня</div>
-        
-        <div class="horizontal-scroll">
-            <div class="h-card">
-                <div class="time">12:00</div>
-                <div class="name">Анна</div>
-                <div class="service">Окрашивание</div>
+        <div class="timeline">
+            <div class="time-slot">
+                <div class="time-label">10:00</div>
+                <div class="slot-card">
+                    <div class="slot-client">Елена В.</div>
+                    <div class="slot-service">Окрашивание корней</div>
+                    <p class="slot-notes">Оксид 6%, краска 7.1. Любит кофе с молоком.</p>
+                </div>
             </div>
-            <div class="h-card">
-                <div class="time">15:30</div>
-                <div class="name">Мария</div>
-                <div class="service">Стрижка (Пикси)</div>
+
+            <div class="time-slot">
+                <div class="time-label">12:30</div>
+                <div class="slot-card free" onclick="openForm('12:30')">
+                    + Свободное время
+                </div>
             </div>
-            <div class="h-card">
-                <div class="time">18:00</div>
-                <div class="name">Елена</div>
-                <div class="service">Укладка (Локоны)</div>
+
+            <div class="time-slot">
+                <div class="time-label">14:00</div>
+                <div class="slot-card">
+                    <div class="slot-client">Марина</div>
+                    <div class="slot-service">Стрижка Пикси</div>
+                    <p class="slot-notes">Сделать челку чуть короче, чем в прошлый раз.</p>
+                </div>
+            </div>
+
+            <div class="time-slot">
+                <div class="time-label">16:00</div>
+                <div class="slot-card free" onclick="openForm('16:00')">
+                    + Свободное время
+                </div>
             </div>
         </div>
 
-        <div class="section-title">Управление</div>
-        <div class="menu-list">
-            <div class="menu-item" onclick="tg.showAlert('Тут будет список всех клиентов')">
-                👥 База клиентов <span class="chevron">></span>
-            </div>
-            <div class="menu-item" onclick="tg.showAlert('Тут будет календарь на месяц')">
-                📅 Календарь записей <span class="chevron">></span>
-            </div>
-        </div>
+        <button class="fab-button" onclick="openForm('')">+ Новая запись</button>
     </div>
+
+    <div id="addForm" class="add-form">
+        <div class="header">
+            <h2>Новая запись</h2>
+            <span style="font-size: 28px; cursor: pointer; color: var(--text-muted);" onclick="closeForm()">×</span>
+        </div>
+        
+        <input type="time" id="appTime" placeholder="Время записи">
+        <input type="text" id="clientName" placeholder="Имя клиента">
+        
+        <select id="service">
+            <option value="" disabled selected>Выберите услугу...</option>
+            <option value="Стрижка">Стрижка</option>
+            <option value="Окрашивание">Окрашивание</option>
+            <option value="Укладка">Укладка</option>
+            <option value="Сложное окрашивание">Сложное окрашивание</option>
+        </select>
+
+        <textarea id="notes" placeholder="Формула, пожелания, история (например: оксид 3%, низкий пучок)"></textarea>
+        
+        <button class="fab-button" style="position: static; margin-top: 10px;" onclick="saveAppointment()">💾 Сохранить</button>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.setHeaderColor('#f5f7fa');
+
+        function openForm(time) {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('addForm').classList.add('active');
+            
+            // Если кликнули по свободному слоту - автозаполняем время
+            if (time) {
+                document.getElementById('appTime').value = time;
+            } else {
+                document.getElementById('appTime').value = '';
+            }
+        }
+
+        function closeForm() {
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('addForm').classList.remove('active');
+        }
+
+        function saveAppointment() {
+            let time = document.getElementById('appTime').value;
+            let name = document.getElementById('clientName').value;
+            let service = document.getElementById('service').value;
+            let notes = document.getElementById('notes').value;
+            
+            if(name && service && time) {
+                let data = {
+                    action: 'new_client',
+                    time: time,
+                    name: name,
+                    service: service,
+                    notes: notes
+                };
+                tg.sendData(JSON.stringify(data));
+                tg.close();
+            } else {
+                tg.showAlert("Пожалуйста, заполните Время, Имя и Услугу!");
+            }
+        }
+    </script>
+</body>
+</html>
