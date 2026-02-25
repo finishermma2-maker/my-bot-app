@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #1c1c1c; color: white; text-align: center; padding: 20px; }
+        .card { background: #2c2c2c; border-radius: 15px; padding: 20px; margin: 15px 0; border: 1px solid #444; }
+        button { background: #0088cc; color: white; border: none; padding: 12px; border-radius: 10px; width: 100%; font-weight: bold; }
+        h2 { color: #0088cc; }
+    </style>
+</head>
+<body>
+    <h2>Premium Club 💎</h2>
+    <div class="card">
+        <h3>1 Месяц</h3>
+        <p>500 ₽</p>
+        <button onclick="buy(30, 500)">Выбрать</button>
+    </div>
+    <div class="card">
+        <h3>3 Месяца</h3>
+        <p>1200 ₽</p>
+        <button onclick="buy(90, 1200)">Выбрать</button>
+    </div>
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        function buy(days, price) {
+            tg.sendData(JSON.stringify({days: days, price: price}));
+            tg.close();
+        }
+    </script>
+</body>
+</html>
