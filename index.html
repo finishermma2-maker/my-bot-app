@@ -12,58 +12,71 @@
         body {
             background-color: var(--bg-color); color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-            margin: 0; padding: 16px; padding-bottom: 80px;
+            margin: 0; padding: 16px; padding-bottom: 90px;
         }
         
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; margin-top: 10px; }
-        .header h1 { margin: 0; font-size: 24px; font-weight: 700; text-transform: capitalize; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 700; }
         
-        /* Кнопка быстрого выбора даты */
         .date-picker-btn {
             background: var(--card-bg); border: 1px solid #ddd; border-radius: 12px;
-            padding: 8px 12px; font-size: 14px; display: flex; align-items: center; gap: 5px;
-            cursor: pointer; position: relative;
+            padding: 8px 12px; font-size: 14px; display: flex; align-items: center;
+            cursor: pointer; position: relative; font-weight: 500;
         }
         .date-picker-btn input[type="date"] {
             position: absolute; opacity: 0; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer;
         }
 
-        /* Календарь-лента */
+        /* ИСПРАВЛЕННЫЙ КАЛЕНДАРЬ: теперь он скроллится и не сжимается */
         .week-calendar {
-            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 10px;
-            scrollbar-width: none;
+            display: flex; gap: 12px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 15px;
+            scrollbar-width: none; scroll-behavior: smooth;
         }
         .week-calendar::-webkit-scrollbar { display: none; }
-        .day-card {
-            min-width: 60px; padding: 12px 0; background: var(--card-bg); border-radius: 16px;
-            text-align: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.02); transition: 0.2s;
-        }
-        .day-card.active { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); color: white; }
-        .day-card .weekday { font-size: 13px; margin-bottom: 4px; opacity: 0.7; }
-        .day-card .day-num { font-size: 20px; font-weight: 700; }
-
-        /* Таймлайн */
-        .timeline-empty { text-align: center; padding: 40px 20px; color: var(--text-muted); }
         
-        /* Кнопка добавления */
+        .day-card {
+            flex: 0 0 64px; /* ЖЕСТКАЯ ШИРИНА: запрещаем сжиматься */
+            padding: 14px 0; background: var(--card-bg); border-radius: 18px;
+            text-align: center; cursor: pointer; border: 1px solid transparent; transition: 0.2s;
+        }
+        .day-card.active { 
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); 
+            color: white; box-shadow: 0 6px 15px rgba(255, 81, 47, 0.3); border-color: transparent;
+        }
+        .day-card .weekday { font-size: 13px; margin-bottom: 4px; opacity: 0.8; font-weight: 500;}
+        .day-card .day-num { font-size: 22px; font-weight: 700; }
+
+        /* ТАЙМЛАЙН ЗАПИСЕЙ */
+        .timeline { display: flex; flex-direction: column; gap: 16px; }
+        .timeline-empty { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+        .time-slot { display: flex; gap: 12px; align-items: flex-start; }
+        .time-label { min-width: 45px; font-size: 15px; font-weight: 600; color: var(--text-main); padding-top: 10px; text-align: right; }
+        .slot-card {
+            flex-grow: 1; background: var(--card-bg); border-radius: 18px; padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04); position: relative; overflow: hidden;
+        }
+        .slot-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent-color); }
+        .slot-client { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+        .slot-service { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; }
+        .slot-notes { font-size: 13px; background: #f9f9fb; padding: 8px 12px; border-radius: 8px; margin: 0; color: #333;}
+
+        /* КНОПКА И ФОРМА */
         .fab-button {
             position: fixed; bottom: 24px; left: 16px; right: 16px;
             background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            color: white; border: none; padding: 16px; border-radius: 20px;
-            font-weight: 600; font-size: 16px; box-shadow: 0 10px 25px rgba(255, 81, 47, 0.3); z-index: 10;
+            color: white; border: none; padding: 18px; border-radius: 20px;
+            font-weight: 600; font-size: 17px; box-shadow: 0 10px 25px rgba(255, 81, 47, 0.35); z-index: 10;
         }
-
-        /* Форма записи */
         .add-form {
             display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--bg-color); z-index: 100; padding: 16px; overflow-y: auto;
+            background: var(--bg-color); z-index: 100; padding: 20px; overflow-y: auto;
         }
         .add-form.active { display: block; }
         input[type="text"], input[type="time"], textarea, select {
             width: 100%; padding: 16px; margin-bottom: 16px; border: 1px solid #e5e5ea;
-            border-radius: 12px; font-size: 16px; box-sizing: border-box; background: #fff;
+            border-radius: 14px; font-size: 16px; box-sizing: border-box; background: #fff;
         }
-        textarea { min-height: 100px; resize: none; }
+        textarea { min-height: 120px; resize: none; }
     </style>
 </head>
 <body>
@@ -80,10 +93,7 @@
         <div class="week-calendar" id="calendarScroll">
             </div>
 
-        <div class="timeline-empty">
-            <h3 style="margin-bottom: 5px;">Записей пока нет</h3>
-            <p style="margin-top: 0; font-size: 14px;">Нажмите кнопку ниже, чтобы добавить клиента на выбранную дату.</p>
-        </div>
+        <div id="timelineContainer" class="timeline"></div>
 
         <button class="fab-button" onclick="openForm()">+ Новая запись</button>
     </div>
@@ -91,10 +101,10 @@
     <div id="addForm" class="add-form">
         <div class="header">
             <h2>Новая запись</h2>
-            <span style="font-size: 28px; color: var(--text-muted);" onclick="closeForm()">×</span>
+            <span style="font-size: 32px; color: var(--text-muted);" onclick="closeForm()">×</span>
         </div>
         
-        <div id="selectedDateDisplay" style="margin-bottom: 15px; color: var(--accent-color); font-weight: bold;"></div>
+        <div id="selectedDateDisplay" style="margin-bottom: 20px; color: var(--accent-color); font-weight: 600; font-size: 16px;"></div>
         
         <input type="time" id="appTime" placeholder="Время записи">
         <input type="text" id="clientName" placeholder="Имя клиента">
@@ -105,9 +115,9 @@
             <option value="Сложное окрашивание">Сложное окрашивание</option>
             <option value="Укладка">Укладка</option>
         </select>
-        <textarea id="notes" placeholder="Формула, пожелания (например: оксид 3%)"></textarea>
+        <textarea id="notes" placeholder="Особенности волос, формула..."></textarea>
         
-        <button class="fab-button" style="position: static; margin-top: 10px;" onclick="saveAppointment()">💾 Сохранить в базу</button>
+        <button class="fab-button" style="position: static; margin-top: 10px;" onclick="saveAppointment()">💾 Сохранить запись</button>
     </div>
 
     <script>
@@ -115,10 +125,12 @@
         tg.expand();
         tg.setHeaderColor('#f5f7fa');
 
-        let currentDate = new Date();
         let selectedDateStr = "";
+        
+        // 1. Инициализация локальной базы данных внутри приложения
+        // Берем сохраненные записи из памяти браузера, или создаем пустой объект
+        let appointmentsDB = JSON.parse(localStorage.getItem('crm_data')) || {};
 
-        // Генерация календаря на 90 дней вперед
         function renderCalendar(startDate) {
             const scroll = document.getElementById('calendarScroll');
             scroll.innerHTML = '';
@@ -126,13 +138,13 @@
             const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
             const dayNames = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
             
-            document.getElementById('monthYearTitle').innerText = `${monthNames[startDate.getMonth()]} ${startDate.getFullYear()}`;
+            document.getElementById('monthYearTitle').innerText = `${monthNames[startDate.getMonth()]}`;
 
             for (let i = 0; i < 90; i++) {
                 let d = new Date(startDate);
                 d.setDate(d.getDate() + i);
                 
-                let dateString = d.toISOString().split('T')[0]; // Формат YYYY-MM-DD
+                let dateString = d.toISOString().split('T')[0];
                 let isToday = i === 0;
 
                 let card = document.createElement('div');
@@ -142,23 +154,61 @@
                 card.innerHTML = `<div class="weekday">${dayNames[d.getDay()]}</div><div class="day-num">${d.getDate()}</div>`;
                 scroll.appendChild(card);
                 
-                if (isToday) selectDay(card, dateString, d); // Выбираем первый день по умолчанию
+                if (isToday) selectDay(card, dateString, d);
             }
         }
 
         function selectDay(element, dateStr, dateObj) {
             document.querySelectorAll('.day-card').forEach(c => c.classList.remove('active'));
             element.classList.add('active');
-            selectedDateStr = dateStr; // Запоминаем выбранную дату!
             
+            selectedDateStr = dateStr; 
             const options = { day: 'numeric', month: 'long', year: 'numeric' };
             document.getElementById('selectedDateDisplay').innerText = `Запись на: ${dateObj.toLocaleDateString('ru-RU', options)}`;
+            
+            // Как только выбрали день - рисуем расписание!
+            renderTimeline(dateStr);
+            
+            // Центрируем выбранную карточку при клике
+            element.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+
+        // 2. ФУНКЦИЯ ОТРИСОВКИ РАСПИСАНИЯ
+        function renderTimeline(dateStr) {
+            const container = document.getElementById('timelineContainer');
+            container.innerHTML = '';
+            
+            let dayAppointments = appointmentsDB[dateStr] || [];
+            
+            if (dayAppointments.length === 0) {
+                container.innerHTML = `
+                <div class="timeline-empty">
+                    <h3 style="margin-bottom: 5px;">Нет записей</h3>
+                    <p style="margin-top: 0; font-size: 14px;">Нажмите + чтобы добавить клиента на этот день.</p>
+                </div>`;
+                return;
+            }
+
+            // Сортируем записи по времени (от раннего к позднему)
+            dayAppointments.sort((a, b) => a.time.localeCompare(b.time));
+
+            dayAppointments.forEach(app => {
+                let notesHtml = app.notes ? `<p class="slot-notes">${app.notes}</p>` : '';
+                container.innerHTML += `
+                <div class="time-slot">
+                    <div class="time-label">${app.time}</div>
+                    <div class="slot-card">
+                        <div class="slot-client">${app.name}</div>
+                        <div class="slot-service">${app.service}</div>
+                        ${notesHtml}
+                    </div>
+                </div>`;
+            });
         }
 
         function jumpToDate(dateValue) {
             if(!dateValue) return;
-            let jumpedDate = new Date(dateValue);
-            renderCalendar(jumpedDate); // Перерисовываем календарь с выбранной даты
+            renderCalendar(new Date(dateValue)); 
         }
 
         function openForm() {
@@ -171,6 +221,7 @@
             document.getElementById('addForm').classList.remove('active');
         }
 
+        // 3. СОХРАНЕНИЕ И ОТПРАВКА
         function saveAppointment() {
             let time = document.getElementById('appTime').value;
             let name = document.getElementById('clientName').value;
@@ -178,14 +229,24 @@
             let notes = document.getElementById('notes').value;
             
             if(name && service && time) {
+                // Создаем массив для этого дня, если его еще нет
+                if (!appointmentsDB[selectedDateStr]) {
+                    appointmentsDB[selectedDateStr] = [];
+                }
+                
+                // Добавляем новую запись
+                appointmentsDB[selectedDateStr].push({
+                    time: time, name: name, service: service, notes: notes
+                });
+                
+                // Сохраняем в память телефона/браузера
+                localStorage.setItem('crm_data', JSON.stringify(appointmentsDB));
+                
                 let data = {
-                    action: 'new_client',
-                    date: selectedDateStr, // Отправляем точную дату (YYYY-MM-DD)
-                    time: time,            // И точное время (HH:MM)
-                    name: name,
-                    service: service,
-                    notes: notes
+                    action: 'new_client', date: selectedDateStr, time: time, name: name, service: service, notes: notes
                 };
+                
+                // Отправляем боту (Telegram закроет окно после этого)
                 tg.sendData(JSON.stringify(data));
                 tg.close();
             } else {
@@ -193,7 +254,6 @@
             }
         }
 
-        // Запуск со дня "Сегодня"
         renderCalendar(new Date());
     </script>
 </body>
